@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fastapi-trusted-devices"
+version = "0.1.0"
+description = "Trusted-device management and session security for FastAPI applications."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Javlon Baxtiyorov", email = "baxtiyorovjavlon8@gmail.com" }]
+keywords = ["fastapi", "security", "authentication", "devices", "jwt", "sessions"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+dependencies = [
+    "fastapi>=0.110",
+    "sqlalchemy[asyncio]>=2.0",
+    "pydantic>=2.5",
+]
+
+[project.optional-dependencies]
+geo = ["httpx>=0.27"]
+jwt = ["pyjwt>=2.8"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "aiosqlite>=0.19",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pyjwt>=2.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/javlondevv/fastapi-trusted-devices"
+Repository = "https://github.com/javlondevv/fastapi-trusted-devices"
+Changelog = "https://github.com/javlondevv/fastapi-trusted-devices/blob/main/CHANGELOG.md"
+Issues = "https://github.com/javlondevv/fastapi-trusted-devices/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fastapi_trusted_devices"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "RUF"]
+# B008: calling Depends() in argument defaults is the idiomatic FastAPI pattern.
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+packages = ["fastapi_trusted_devices"]
+mypy_path = "src"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
