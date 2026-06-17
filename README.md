@@ -1,6 +1,13 @@
 # fastapi-trusted-devices
 
+[![PyPI](https://img.shields.io/pypi/v/fastapi-trusted-devices.svg)](https://pypi.org/project/fastapi-trusted-devices/)
+[![Python versions](https://img.shields.io/pypi/pyversions/fastapi-trusted-devices.svg)](https://pypi.org/project/fastapi-trusted-devices/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![CI](https://github.com/javlondevv/fastapi-trusted-devices/actions/workflows/ci.yml/badge.svg)](https://github.com/javlondevv/fastapi-trusted-devices/actions/workflows/ci.yml)
+
 Trusted-device management and session security for **FastAPI**.
+
+📦 **PyPI:** https://pypi.org/project/fastapi-trusted-devices/
 
 Bind every authenticated session to a known device, list and revoke devices,
 and detect suspicious activity — without locking your app into a specific auth
