@@ -1,0 +1,92 @@
+name: Docker
+
+# Builds the runnable demo image (examples/minimal_app.py) and publishes it to
+# GHCR as ghcr.io/javlondevv/fastapi-trusted-devices. Runs on the same version
+# tags as release.yml; a manual run builds the latest v* tag.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            tag="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+            if [ -z "$tag" ]; then
+              echo "::error::No v* tag found"
+              exit 1
+            fi
+            git checkout --quiet "refs/tags/$tag"
+            # Tags older than this workflow (e.g. v0.1.0) have no Dockerfile:
+            # build the tag's source with the build files from this run's commit.
+            git checkout --quiet "$GITHUB_SHA" -- Dockerfile .dockerignore
+          else
+            tag="$REF_NAME"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Building $tag ($(git rev-parse --short HEAD))"
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        env:
+          # GHCR reads the description from the index of a multi-arch image.
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.tag.outputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.tag.outputs.tag }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=fastapi-trusted-devices demo
+            org.opencontainers.image.description=Runnable demo of fastapi-trusted-devices (examples/minimal_app.py) served by uvicorn on port 8000.
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.revision=${{ steps.tag.outputs.sha }}
+          annotations: |
+            org.opencontainers.image.description=Runnable demo of fastapi-trusted-devices (examples/minimal_app.py) served by uvicorn on port 8000.
+            org.opencontainers.image.licenses=MIT
+
+      - uses: docker/build-push-action@v7
+        with:
+          # Build the checked-out tree (the tag), not the default Git context.
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}

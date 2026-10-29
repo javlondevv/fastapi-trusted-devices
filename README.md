@@ -40,6 +40,7 @@
 - [Install](#install)
 - [Quickstart](#quickstart)
 - [Endpoints](#endpoints)
+- [Run the demo with Docker](#run-the-demo-with-docker)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Support the project](#support-the-project)
@@ -123,6 +124,23 @@ async def me() -> dict[str, str]:
 | `DELETE` | `/{device_uid}` | Revoke a specific device |
 | `POST` | `/logout` | Revoke the current device |
 | `POST` | `/revoke-all` | Revoke every device except the current one |
+
+## Run the demo with Docker
+
+The [`examples/minimal_app.py`](./examples/minimal_app.py) demo is published as
+a container image:
+
+```bash
+docker run --rm -p 8000:8000 ghcr.io/javlondevv/fastapi-trusted-devices
+```
+
+Open <http://localhost:8000/docs> for the interactive API, or try it with curl
+(identity is faked via headers in the demo):
+
+```bash
+curl -X POST localhost:8000/login -H "X-User-Id: alice"   # -> {"device_uid": "..."}
+curl localhost:8000/trusted-devices -H "X-User-Id: alice" -H "X-Device-Uid: <device_uid>"
+```
 
 ## Roadmap
 
