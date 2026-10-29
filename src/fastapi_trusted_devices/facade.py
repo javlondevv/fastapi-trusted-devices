@@ -23,7 +23,7 @@ T = TypeVar("T")
 #: An identity extractor may be sync or async.
 UserIdExtractor = Callable[[Request], str | Awaitable[str]]
 DeviceUIDExtractor = Callable[
-    [Request], str | None | Awaitable[str | None]
+    [Request], str | Awaitable[str | None] | None
 ]
 
 #: A FastAPI dependency returning the validated calling device.
